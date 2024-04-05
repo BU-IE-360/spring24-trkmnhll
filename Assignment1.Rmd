@@ -1,0 +1,125 @@
+---
+title: "house price index"
+author: "Halil İbrahim Türkmen"
+date: '2024-04-05'
+output: html_document
+---
+
+**1.HOUSE PRICES**
+In this section, I tried to explain the variations in the house price data using as predictors: Furniture and Decoration expenditures, Building Materials, Hardware, and Ironmongery expenditures, USD/TL exchange rate,Survey Results on Suitability for Purchasing Durable Goods in the Current Period, on a Scale of 100.  From January 2012 to January 2024 monthly data is analysed.
+```{r}
+require(openxlsx) #library(openxlsx)
+require(ggplot2)
+require(data.table)
+require(skimr)
+require(GGally)
+require(ggcorrplot)
+require(forecast)
+
+options(repr.plot.width=12.7, repr.plot.height=8.5)
+
+
+data_path='/Users/halilibrahimturkmen/Downloads/EVDS-7.xlsx'
+
+
+house_prices=read.xlsx(data_path,sheet='EVDS')
+str(house_prices)
+```
+```{r}
+ggpairs(house_prices)
+
+```
+```{r}
+l_fit = lm(TP.HKFE01~.,data=house_prices)
+l_fit
+```
+```{r}
+summary(l_fit)
+
+```
+```{r}
+plot(l_fit)
+
+```
+
+```{r}
+l_fit_dropped <- lm(TP.HKFE01 ~ . - TP.KKHARTUT.KT17, data = house_prices)
+summary(l_fit_dropped)
+```
+
+```{r}
+# Create the interaction term using TP.DK.USD.A.YTL
+house_prices$interaction <- house_prices$TP.DK.USD.A.YTL * house_prices$TP.KKHARTUT.KT23
+
+# Fit the nonlinear regression model with the interaction term
+l_fit_nonlinear_interaction <- lm(TP.HKFE01 ~ .-TP.KKHARTUT.KT23 - TP.KKHARTUT.KT17 -TP.DK.USD.A.YTL  + interaction , data = house_prices)
+
+# Display summary of the model
+summary(l_fit_nonlinear_interaction)
+```
+**2. FEDERAL RESERVE**
+I tried to explain the variations in the federal reserve data using as predictors: unemployment rate, USD/TL exchange rate, money supply, TÜFE(consumer price index), and government spendings. From January 2014 to January 2024 monthly data is analysed.
+```{r}
+data_path='/Users/halilibrahimturkmen/Downloads/EVDS-5.xlsx'
+reserve=read.xlsx(data_path,sheet='EVDS')
+str(reserve)
+```
+```{r}
+summary_data=skim(reserve)
+print(summary_data)
+```
+```{r}
+ggplot(reserve, aes(x=TP.REZVARPD.K1)) + geom_histogram()
+```
+```{r}
+correl_info=cor(reserve)
+
+ggcorrplot(correl_info, 
+           hc.order = TRUE, 
+           type = "lower",
+           lab = TRUE)
+```
+```{r}
+ggpairs(reserve)
+
+```
+```{r}
+l_fit = lm(TP.REZVARPD.K1~.,data=reserve)
+l_fit
+```
+```{r}
+summary(l_fit)
+```
+
+**3.ELECTRICITY CONSUMPTION**
+I tried to explain the variations in the electricity consumption data using as predictors: BIST 100 index, commercial loans, Manufacturing Industry Capacity Utilization Rate, and number of produced vehicles. From January 2016 to February 2024 monthly data is analysed.
+
+```{r}
+data_path='/Users/halilibrahimturkmen/Downloads/EVDS-9.xlsx'
+electricity_consumption=read.xlsx(data_path,sheet='EVDS')
+str(electricity_consumption)
+```
+```{r}
+ggpairs(electricity_consumption)
+```
+```{r}
+l_fit = lm(TP.ELEKTUKETIM.TKT1~.,data=electricity_consumption)
+l_fit
+```
+```{r}
+summary(l_fit)
+```
+```{r}
+plot(l_fit)
+```
+
+
+
+
+
+
+
+
+
+
+
